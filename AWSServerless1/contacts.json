@@ -1,0 +1,42 @@
+[
+  {
+    "Id": "0f8fad5b-d9cb-469f-a165-70867728950e",
+    "Name": "Lebron James",
+    "PrimaryEmail": "lbj@gmail.com",
+    "SecondaryEmails": [ "greatestever@yahoo.com", "23man@yandex.mail" ],
+    "Phones": [
+      {
+        "PhoneNumberType": 2,
+        "CallingCode": "+1",
+        "Number": "1234444456"
+      }
+    ],
+    "StreetAddress": {
+      "Street": "34 Malibu Heights",
+      "City": "Los Angeles",
+      "State": "California",
+      "ZipCode": "90210"
+    },
+    "CreatedTimestamp": "2021-06-07T09:06:29.9153057-07:00"
+  },
+  {
+    "Id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+    "Name": "Steph Curry",
+    "PrimaryEmail": "scbay@gmail.com",
+    "SecondaryEmails": [ "greatestshooterever@yahoo.com", "goldenstate@yandex.mail" ],
+    "Phones": [
+      {
+        "PhoneNumberType": 2,
+        "CallingCode": "+1",
+        "Number": "1234412456"
+      }
+    ],
+    "StreetAddress": {
+      "Street": "34 Embarcadero Way",
+      "City": "San Francisco",
+      "State": "California",
+      "ZipCode": "90211"
+    },
+    "CreatedTimestamp": "2021-06-07T09:06:29.9159109-07:00"
+  }
+]
