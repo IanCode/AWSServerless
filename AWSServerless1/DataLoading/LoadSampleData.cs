@@ -1,14 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2.DocumentModel;
-
+using Amazon.DynamoDBv2.Model;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace AWSServerless1
 {
-    public static class LoadSampleData
+    public static partial class LoadSampleData
     {
         public static void Main(string[] args)
         {
@@ -87,5 +88,64 @@ namespace AWSServerless1
 
             return true;
         }
+
+        public static async Task<bool> InitializeTableAsync(string tableName)
+        {
+            await CheckingTableExistence_async(tableName);
+            await CreateTable_async(tableName);
+        }
+
+        public static async Task<bool> CheckingTableExistence_async(string tblNm)
+        {
+            var response = await DdbIntro.Client.ListTablesAsync();
+            return response.TableNames.Contains(tblNm);
+        }
+
+        public static async Task<bool> CreateTable_async(string tableName,
+            List<AttributeDefinition> tableAttributes,
+            List<KeySchemaElement> tableKeySchema,
+            ProvisionedThroughput provisionedThroughput)
+        {
+            bool response = true;
+
+            // Build the 'CreateTableRequest' structure for the new table
+            var request = new CreateTableRequest
+            {
+                TableName = tableName,
+                AttributeDefinitions = tableAttributes,
+                KeySchema = tableKeySchema,
+                // Provisioned-throughput settings are always required,
+                // although the local test version of DynamoDB ignores them.
+                ProvisionedThroughput = provisionedThroughput
+            };
+
+            try
+            {
+                var makeTbl = await DdbIntro.Client.CreateTableAsync(request);
+            }
+            catch (Exception)
+            {
+                response = false;
+            }
+
+            return response;
+        }
+
+        public static async Task<TableDescription> GetTableDescription(string tableName)
+        {
+            TableDescription result = null;
+
+            // If the table exists, get its description.
+            try
+            {
+                var response = await DdbIntro.Client.DescribeTableAsync(tableName);
+                result = response.Table;
+            }
+            catch (Exception)
+            { }
+
+            return result;
+        }
     }
+}
 }

@@ -25,6 +25,12 @@ namespace AWSServerless1
         const string TABLENAME_ENVIRONMENT_VARIABLE_LOOKUP = "ContactTable";
 
         public const string ID_QUERY_STRING_NAME = "Id";
+
+        public const string LETTER_QUERY_STRING_NAME = "Letter";
+
+        public const string CITY_QUERY_STRING_NAME = "City";
+
+
         IDynamoDBContext DDBContext { get; set; }
 
         /// <summary>
@@ -128,6 +134,71 @@ namespace AWSServerless1
                 Body = JsonConvert.SerializeObject(contact),
                 Headers = new Dictionary<string, string> { { "Content-Type", "application/json" } }
             };
+            return response;
+        }
+
+        public async Task<APIGatewayProxyResponse> GetContactsWithLastNameAsync(APIGatewayProxyRequest request, ILambdaContext context)
+        {
+            var letter = request.PathParameters[LETTER_QUERY_STRING_NAME].FirstOrDefault();
+            var search = DDBContext.ScanAsync<Contact>(null);
+            var contacts = await search.GetNextSetAsync();
+
+            var contactsWithLetterLN = contacts.Where(c => c.Name.FirstOrDefault() == letter);
+
+            if(contactsWithLetterLN == null)
+            {
+                return new APIGatewayProxyResponse
+                {
+                    StatusCode = (int)HttpStatusCode.NotFound
+                };
+            }
+
+            var response = new APIGatewayProxyResponse
+            {
+                StatusCode = (int)HttpStatusCode.OK,
+                Body = JsonConvert.SerializeObject(contactsWithLetterLN)
+            };
+
+            return response;
+        }
+
+        public async Task<APIGatewayProxyResponse> GetContactsByCityAsync(APIGatewayProxyRequest request, ILambdaContext context)
+        {
+            var city = request.PathParameters[CITY_QUERY_STRING_NAME];
+            var search = DDBContext.ScanAsync<Contact>(null);
+            var contacts = await search.GetNextSetAsync();
+
+            var contactsCityTable = new Dictionary<string, List<Contact>>();
+
+            foreach(var contact in contacts)
+            {
+                if(contactsCityTable.TryGetValue(contact.StreetAddress.City, out var cityContacts))
+                {
+                    cityContacts.Add(contact);
+                    contactsCityTable[contact.StreetAddress.City] = cityContacts;
+                }
+                else
+                {
+                    contactsCityTable.Add(contact.StreetAddress.City, new List<Contact> { contact });
+                }
+            }
+
+            //var contactsInCity = contacts.Where(c => c.StreetAddress.City == city);
+
+            if (contactsCityTable == null)
+            {
+                return new APIGatewayProxyResponse
+                {
+                    StatusCode = (int)HttpStatusCode.NotFound
+                };
+            }
+
+            var response = new APIGatewayProxyResponse
+            {
+                StatusCode = (int)HttpStatusCode.OK,
+                Body = JsonConvert.SerializeObject(contactsCityTable)
+            };
+
             return response;
         }
 
